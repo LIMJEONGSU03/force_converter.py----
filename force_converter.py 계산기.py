@@ -43,12 +43,35 @@ def clear_input():
     force_entry.focus_set()
 
 
+def toggle_fullscreen(event=None):
+    is_fullscreen = not root.attributes("-fullscreen")
+    root.attributes("-fullscreen", is_fullscreen)
+    fullscreen_button.config(text="창 모드" if is_fullscreen else "전체 화면")
+    if event:
+        return "break"
+
+
+def exit_fullscreen(event=None):
+    root.attributes("-fullscreen", False)
+    fullscreen_button.config(text="전체 화면")
+    return "break"
+
+
 root = tk.Tk()
 root.title("힘 단위 변환기")
 root.resizable(False, False)
 
 main_frame = tk.Frame(root, padx=24, pady=24)
 main_frame.pack()
+
+window_controls = tk.Frame(main_frame)
+window_controls.pack(fill=tk.X, pady=(0, 8))
+
+fullscreen_button = tk.Button(
+    window_controls, text="전체 화면", command=toggle_fullscreen
+)
+fullscreen_button.pack(side=tk.LEFT)
+tk.Button(window_controls, text="최소화", command=root.iconify).pack(side=tk.RIGHT)
 
 tk.Label(main_frame, text="힘 단위 변환기", font=("맑은 고딕", 16, "bold")).pack(
     pady=(0, 16)
@@ -79,6 +102,9 @@ tk.Button(button_frame, text="지우기", width=10, command=clear_input).pack(
 
 result_label = tk.Label(main_frame, text="결과가 여기에 표시됩니다.", justify=tk.LEFT)
 result_label.pack(anchor="w")
+
+root.bind("<F11>", toggle_fullscreen)
+root.bind("<Escape>", exit_fullscreen)
 
 force_entry.focus_set()
 root.mainloop()
