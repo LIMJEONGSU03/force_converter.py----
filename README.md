@@ -59,3 +59,55 @@ py ".\force_converter.py 계산기.py"
 - `1 kgf = 9.80665 N`
 
 결과는 소수점 둘째 자리까지 표시됩니다.
+
+## CSV 하중 분석 프로그램
+
+`load_analyzer.py`는 같은 폴더의 `load_bad.csv`를 읽어 행별 응력과 최대값을 분석합니다. 입력 CSV에는 다음 열이 있어야 합니다.
+
+| 열 이름 | 의미 | 단위 |
+| --- | --- | --- |
+| `time_s` | 측정 시간 | s |
+| `force_N` | 하중 | N |
+
+응력은 `stress_MPa = force_N / area_mm2`로 계산합니다. `N/mm2`는 `MPa`와 같으며, 단면적은 `load_analyzer.py`의 `area_mm2 = 100`에서 설정합니다. 기준응력은 `reference_stress_MPa = 6`이며, 이 값보다 큰 응력(`> 6 MPa`)의 데이터 개수를 출력합니다.
+
+### 필요한 환경
+
+- Python 3
+- `matplotlib`
+
+`csv`, `math`, `pathlib`는 Python 표준 라이브러리입니다. `matplotlib`이 없다면 분석에 사용할 Python 환경에 설치합니다.
+
+```bash
+python -m pip install matplotlib
+```
+
+### 실행 명령
+
+프로그램 파일과 CSV가 있는 폴더에서 실행합니다.
+
+```bash
+python .\load_analyzer.py
+```
+
+Windows에서는 다음 명령도 사용할 수 있습니다.
+
+```powershell
+py .\load_analyzer.py
+```
+
+다른 입력 파일을 사용하려면 `load_analyzer.py`의 `csv_path` 파일명을 변경합니다.
+
+### 출력
+
+- 콘솔: 제외한 행 수, 유효 데이터 수, 최대 하중과 해당 시간, 최대 응력과 해당 시간, 기준응력 초과 데이터 수
+- `load_result.csv`: 유효 데이터의 `time_s`, `force_N`, 계산된 `stress_MPa` 열
+- `stress_plot.png`: 시간–응력 그래프. 최대 응력점은 빨간 점과 값으로 표시합니다.
+
+결과 파일은 프로그램과 같은 폴더에 저장됩니다. 원본 입력 CSV는 수정하지 않습니다.
+
+### 오류 처리
+
+- 입력 CSV에 `time_s` 또는 `force_N` 열이 없으면 필요한 열을 알리는 오류로 분석을 중단합니다.
+- 각 행의 `time_s`나 `force_N`이 비어 있거나 숫자가 아니면 원본 CSV의 행 번호와 문제값을 출력하고 해당 행을 분석에서 제외합니다. 제외 행은 한 번만 집계합니다.
+- 유효하지 않은 행을 제외한 뒤 유효 데이터가 하나도 남지 않으면 안내를 출력하고 계산을 중단합니다. 이 경우 결과 CSV와 그래프는 새로 저장되지 않습니다.
